@@ -35,7 +35,8 @@ const (
 	REM
 	DEFINE
 	DOT
-	SEMICOLOUMN
+	SEMICOLON
+	COMMA
 	operator_end
 )
 
@@ -52,14 +53,15 @@ var tokens = [...]string{
 	BEGIN: "BEGIN",
 	END:   "END",
 
-	ADD:         "+",
-	SUB:         "-",
-	MUL:         "*",
-	QUO:         "/",
-	REM:         "%",
-	DEFINE:      ":=",
-	DOT:         ".",
-	SEMICOLOUMN: ";",
+	ADD:       "+",
+	SUB:       "-",
+	MUL:       "*",
+	QUO:       "/",
+	REM:       "%",
+	DEFINE:    ":=",
+	DOT:       ".",
+	SEMICOLON: ";",
+	COMMA:     ",",
 }
 
 var keywords map[string]Token
@@ -88,6 +90,10 @@ func (tok Token) IsLiteral() bool { return literal_beg < tok && tok < literal_en
 func (tok Token) IsOperator() bool {
 	return operator_beg < tok && tok < operator_end
 }
+
+// IsKeyword returns true for tokens corresponding to keywords;
+// it returns false otherwise.
+func (tok Token) IsKeyword() bool { return keyword_beg < tok && tok < keyword_end }
 
 // IsKeyword reports whether name is a Go keyword, such as "func" or "return".
 func IsKeyword(name string) bool {
