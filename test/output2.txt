@@ -1,0 +1,8 @@
+ident:"aaa"
+lexem:";"
+ident:"ooo"
+lexem:";"
+2a: error, invalid lexem
+lexem:";"
+ident:"eee"
+lexem:";"

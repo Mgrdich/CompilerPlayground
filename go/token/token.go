@@ -14,20 +14,20 @@ const (
 
 	//  Identifiers and basic type literals
 	// (these tokens stand for classes of literals)
-	literal_beg
+	literalBeg
 	IDENT
 	INTEGER // 12345
 	STRING  // "abc"
-	literal_end
+	literalEnd
 
-	keyword_beg
+	keywordBeg
 	VAR // var
 	BEGIN
 	END
-	keyword_end
+	keywordEnd
 
 	// Operators and delimiters
-	operator_beg
+	operatorBeg
 	ADD
 	SUB
 	MUL
@@ -37,7 +37,7 @@ const (
 	DOT
 	SEMICOLON
 	COMMA
-	operator_end
+	operatorEnd
 )
 
 var tokens = [...]string{
@@ -67,8 +67,8 @@ var tokens = [...]string{
 var keywords map[string]Token
 
 func init() {
-	keywords = make(map[string]Token, keyword_end-(keyword_beg+1))
-	for i := keyword_beg + 1; i < keyword_end; i++ {
+	keywords = make(map[string]Token, keywordEnd-(keywordBeg+1))
+	for i := keywordBeg + 1; i < keywordEnd; i++ {
 		keywords[tokens[i]] = i
 	}
 }
@@ -83,17 +83,17 @@ func Lookup(ident string) Token {
 
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
-func (tok Token) IsLiteral() bool { return literal_beg < tok && tok < literal_end }
+func (tok Token) IsLiteral() bool { return literalBeg < tok && tok < literalEnd }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
 func (tok Token) IsOperator() bool {
-	return operator_beg < tok && tok < operator_end
+	return operatorBeg < tok && tok < operatorEnd
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
-func (tok Token) IsKeyword() bool { return keyword_beg < tok && tok < keyword_end }
+func (tok Token) IsKeyword() bool { return keywordBeg < tok && tok < keywordEnd }
 
 // IsKeyword reports whether name is a Go keyword, such as "func" or "return".
 func IsKeyword(name string) bool {
