@@ -49,3 +49,5 @@ go.work
 
 
 .idea/*
+
+exec-*
