@@ -47,3 +47,5 @@ replay_pid*
 # Go workspace file
 go.work
 
+
+.idea/*
