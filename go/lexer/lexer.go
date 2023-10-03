@@ -37,14 +37,36 @@ func (lex Lexer) Tokenize() {
 	}
 
 	lex.scanner = bufio.NewScanner(f)
+	lex.scanner.Split(bufio.ScanRunes)
 	lex.startScan()
+}
+
+func (lex Lexer) next() {
+	lex.scanner.Scan()
+}
+
+func (lex Lexer) text() string {
+	return lex.scanner.Text()
 }
 
 func (lex Lexer) startScan() {
 	for lex.scanner.Scan() {
-		text := lex.scanner.Text()
-		fmt.Println(text)
+		text := lex.text()
+		fmt.Print(text)
+		/*
+			switch text {
+			case :
+
+			}*/
 	}
+}
+
+func (lex Lexer) scanNumber() {
+
+}
+
+func (lex Lexer) scanString() {
+
 }
 
 func (lex Lexer) Print() {
