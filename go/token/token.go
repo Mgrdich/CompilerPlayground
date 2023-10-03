@@ -49,9 +49,9 @@ var tokens = [...]string{
 	INTEGER: "INTEGER",
 	STRING:  "STRING",
 
-	VAR:   "VAR",
-	BEGIN: "BEGIN",
-	END:   "END",
+	VAR:   "var",
+	BEGIN: "begin",
+	END:   "end",
 
 	ADD:       "+",
 	SUB:       "-",
@@ -65,6 +65,10 @@ var tokens = [...]string{
 }
 
 var keywords map[string]Token
+
+var predeclaredTypes = map[string]bool{
+	"integer": true,
+}
 
 func init() {
 	keywords = make(map[string]Token, keywordEnd-(keywordBeg+1))
@@ -114,4 +118,10 @@ func IsIdentifier(name string) bool {
 		}
 	}
 	return true
+}
+
+// IsPredeclared returns if is predeclared
+// lower one work since the map is set , so we don't have to differentiate between
+func IsPredeclared(s string) bool {
+	return predeclaredTypes[s]
 }
