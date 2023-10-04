@@ -3,19 +3,20 @@ package lexer
 import (
 	"CompilerPlayground/token"
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"unicode"
 	"unicode/utf8"
 )
 
-type tokens struct {
-	t     token.Token
-	value string
+type LexToken struct {
+	tok token.Token
+	lit string
 }
 
 type Lexer struct {
-	tokens    []tokens // TODO think about not storing them
+	tokens    []LexToken // TODO think about not storing them
 	directory string
 	reader    *bufio.Reader
 	ch        rune
@@ -66,10 +67,11 @@ func (lex Lexer) next() (r rune, size int, err error) {
 
 func (lex Lexer) StartScan() {
 	for {
-		tok, _ := lex.Scan()
+		tok, lit := lex.Scan()
 		if tok == token.EOF {
 			break
 		}
+		lex.tokens = append(lex.tokens, LexToken{tok: tok, lit: lit})
 	}
 }
 
@@ -91,21 +93,25 @@ func (lex Lexer) Scan() (t token.Token, l string) {
 		if len(lit) > 1 {
 			// keywords are longer than one letter - avoid lookup otherwise
 			tok = token.Lookup(lit)
+		} else {
+			tok = token.IDENT
 		}
 	case isDecimal(ch):
-		lex.scanNumber()
+		tok, lit = lex.scanNumber()
 	default:
-		break
+		tok = token.ADD
+		lit = "testing"
 	}
 
 	return tok, lit
 }
 
-func (lex Lexer) scanNumber() {
+func (lex Lexer) scanNumber() (t token.Token, lit string) {
 
 }
 
 func (lex Lexer) scanString() string {
+	// " should be consumed to start scanning string value
 	return ""
 }
 
@@ -122,6 +128,22 @@ func (lex Lexer) skipWhitespace() {
 	}
 }
 
+// Print Mock function that let's us print some values
+// to show that the lexer is working normally
 func (lex Lexer) Print() {
+	for _, lt := range lex.tokens {
+		var typing string
+		switch {
+		case lt.tok == token.ILLEGAL:
+			fmt.Println(lt.lit, ": error, invalid lexem")
+		case lt.tok.IsNumber():
+			typing = "number"
+		case lt.tok.IsKeyword() || lt.tok.IsOperator():
+			typing = "lexem"
+		default:
+			typing = "unknown" // TODO something might have gone wrong here
+		}
 
+		fmt.Println(typing, ":", lt.lit)
+	}
 }

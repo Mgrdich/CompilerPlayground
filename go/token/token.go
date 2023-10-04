@@ -17,8 +17,11 @@ const (
 	// (these tokens stand for classes of literals)
 	literalBeg
 	IDENT
+	numBeg
 	INTEGER // 12345
-	STRING  // "abc"
+	FLOAT
+	numEnd // 123.323
+	STRING // "abc"
 	literalEnd
 
 	keywordBeg
@@ -95,6 +98,11 @@ func (tok Token) IsLiteral() bool { return literalBeg < tok && tok < literalEnd 
 // delimiters; it returns false otherwise.
 func (tok Token) IsOperator() bool {
 	return operatorBeg < tok && tok < operatorEnd
+}
+
+// IsNumber returns true for tokens corresponding to a numbers
+func (tok Token) IsNumber() bool {
+	return numBeg < tok && tok < numEnd
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
