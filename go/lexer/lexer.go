@@ -10,6 +10,9 @@ import (
 	"unicode/utf8"
 )
 
+// eof is the end of file constant , we can use it during scanIdentifier
+const eof = -1
+
 type LexToken struct {
 	tok token.Token
 	lit string
@@ -19,7 +22,7 @@ type Lexer struct {
 	tokens    []LexToken // TODO think about not storing them
 	directory string
 	reader    *bufio.Reader
-	ch        rune
+	ch        rune // current rune
 }
 
 func lower(ch rune) rune     { return ('a' - 'A') | ch } // returns lower-case ch iff ch is ASCII letter
@@ -56,13 +59,17 @@ func (lex Lexer) Tokenize() {
 	lex.StartScan()
 }
 
-func (lex Lexer) next() (r rune, size int, err error) {
-	r, size, err = lex.reader.ReadRune()
+func (lex Lexer) next() (r rune, size int) {
+	r, size, err := lex.reader.ReadRune()
 	if err == nil {
 		lex.ch = r
 	}
 
-	return r, size, err
+	if err == io.EOF {
+		lex.ch = eof
+	}
+
+	return r, size
 }
 
 func (lex Lexer) StartScan() {
@@ -76,18 +83,20 @@ func (lex Lexer) StartScan() {
 }
 
 func (lex Lexer) Scan() (t token.Token, l string) {
-	_, _, err := lex.next()
-	if err != nil {
-		if err == io.EOF {
-			return token.EOF, ""
-		}
-		panic("something went in the startScan")
+	// Someone from before reads already reach the end of file
+	if lex.ch == eof {
+		return token.EOF, ""
 	}
+
+	lex.next()
 
 	// no error
 	var tok token.Token
 	var lit string
 	switch ch := lex.ch; {
+	case ch == eof:
+		tok = token.EOF
+		lit = ""
 	case isLetter(ch):
 		lit = lex.scanIdentifier()
 		if len(lit) > 1 {
@@ -99,6 +108,7 @@ func (lex Lexer) Scan() (t token.Token, l string) {
 	case isDecimal(ch):
 		tok, lit = lex.scanNumber()
 	default:
+		// TODO string and other tokens should be added here
 		tok = token.ADD
 		lit = "testing"
 	}
@@ -107,7 +117,7 @@ func (lex Lexer) Scan() (t token.Token, l string) {
 }
 
 func (lex Lexer) scanNumber() (t token.Token, lit string) {
-
+	return token.INTEGER, ""
 }
 
 func (lex Lexer) scanString() string {
@@ -116,15 +126,22 @@ func (lex Lexer) scanString() string {
 }
 
 func (lex Lexer) scanIdentifier() string {
-	return ""
+	// add already nexted letter cause in order this process to start is should be a letter
+	builtWord := []rune{lex.ch}
+
+	lex.next()
+	for isLetter(lex.ch) || isDigit(lex.ch) {
+		// this position is important cause it will make eof case work
+		builtWord = append(builtWord, lex.ch)
+		lex.next()
+	}
+
+	return string(builtWord)
 }
 
 func (lex Lexer) skipWhitespace() {
 	for lex.ch == ' ' || lex.ch == '\t' || lex.ch == '\n' {
-		_, _, err := lex.next()
-		if err != nil {
-			return
-		}
+		lex.next()
 	}
 }
 
