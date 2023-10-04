@@ -11,6 +11,7 @@ const (
 
 	ILLEGAL Token = iota
 	COMMENT
+	EOF
 
 	//  Identifiers and basic type literals
 	// (these tokens stand for classes of literals)
@@ -44,6 +45,7 @@ var tokens = [...]string{
 
 	ILLEGAL: "ILLEGAL",
 	COMMENT: "COMMENT",
+	EOF:     "EOF",
 
 	IDENT:   "IDENT",
 	INTEGER: "INTEGER",

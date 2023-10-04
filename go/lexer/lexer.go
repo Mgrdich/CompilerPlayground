@@ -1,9 +1,8 @@
 package lexer
 
 import (
+	"CompilerPlayground/token"
 	"bufio"
-	"fmt"
-	"go/token"
 	"io"
 	"os"
 	"unicode"
@@ -16,7 +15,7 @@ type tokens struct {
 }
 
 type Lexer struct {
-	tokens    []tokens
+	tokens    []tokens // TODO think about not storing them
 	directory string
 	reader    *bufio.Reader
 	ch        rune
@@ -53,7 +52,7 @@ func (lex Lexer) Tokenize() {
 	}
 
 	lex.reader = bufio.NewReader(f)
-	lex.startScan()
+	lex.StartScan()
 }
 
 func (lex Lexer) next() (r rune, size int, err error) {
@@ -65,32 +64,53 @@ func (lex Lexer) next() (r rune, size int, err error) {
 	return r, size, err
 }
 
-func (lex Lexer) startScan() {
+func (lex Lexer) StartScan() {
 	for {
-		ch, _, err := lex.next()
-		if err == nil {
-			fmt.Print(string(ch))
-		}
-		if err == io.EOF {
+		tok, _ := lex.Scan()
+		if tok == token.EOF {
 			break
-		} else {
-			// some other error
-			panic("something went in the startScan")
 		}
-
 	}
+}
+
+func (lex Lexer) Scan() (t token.Token, l string) {
+	_, _, err := lex.next()
+	if err != nil {
+		if err == io.EOF {
+			return token.EOF, ""
+		}
+		panic("something went in the startScan")
+	}
+
+	// no error
+	var tok token.Token
+	var lit string
+	switch ch := lex.ch; {
+	case isLetter(ch):
+		lit = lex.scanIdentifier()
+		if len(lit) > 1 {
+			// keywords are longer than one letter - avoid lookup otherwise
+			tok = token.Lookup(lit)
+		}
+	case isDecimal(ch):
+		lex.scanNumber()
+	default:
+		break
+	}
+
+	return tok, lit
 }
 
 func (lex Lexer) scanNumber() {
 
 }
 
-func (lex Lexer) scanString() {
-
+func (lex Lexer) scanString() string {
+	return ""
 }
 
-func (lex Lexer) scanIdentifier() {
-
+func (lex Lexer) scanIdentifier() string {
+	return ""
 }
 
 func (lex Lexer) skipWhitespace() {
