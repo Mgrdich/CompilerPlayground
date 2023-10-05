@@ -45,7 +45,8 @@ func GetLexer(directory string) Lexer {
 	return Lexer{directory: directory}
 }
 
-func (lex Lexer) Tokenize() {
+// Tokenize will tokenize the whole file , you can actually call lex.Scan() independently as well
+func (lex *Lexer) Tokenize() {
 	if len(lex.directory) == 0 {
 		panic("directory is not defined")
 	}
@@ -59,7 +60,7 @@ func (lex Lexer) Tokenize() {
 	lex.StartScan()
 }
 
-func (lex Lexer) next() (r rune, size int) {
+func (lex *Lexer) next() (r rune, size int) {
 	r, size, err := lex.reader.ReadRune()
 	if err == nil {
 		lex.ch = r
@@ -72,7 +73,7 @@ func (lex Lexer) next() (r rune, size int) {
 	return r, size
 }
 
-func (lex Lexer) StartScan() {
+func (lex *Lexer) StartScan() {
 	for {
 		tok, lit := lex.Scan()
 		if tok == token.EOF {
@@ -82,13 +83,15 @@ func (lex Lexer) StartScan() {
 	}
 }
 
-func (lex Lexer) Scan() (t token.Token, l string) {
+func (lex *Lexer) Scan() (t token.Token, l string) {
 	// Someone from before reads already reach the end of file
 	if lex.ch == eof {
 		return token.EOF, ""
 	}
 
 	lex.next()
+
+	//lex.skipWhitespace()
 
 	// no error
 	var tok token.Token
@@ -116,16 +119,43 @@ func (lex Lexer) Scan() (t token.Token, l string) {
 	return tok, lit
 }
 
-func (lex Lexer) scanNumber() (t token.Token, lit string) {
-	return token.INTEGER, ""
+// digits can only read base 10 for now
+// even though the go source code implements it as an arbitrary base
+func (lex *Lexer) digits(builtNumber *[]rune) {
+	m := rune('0' + 10)
+	for isDecimal(lex.ch) {
+		if lex.ch >= m {
+			// TODO something must be done here understand the intricate case
+		}
+		*builtNumber = append(*builtNumber, lex.ch)
+		lex.next()
+	}
 }
 
-func (lex Lexer) scanString() string {
+func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
+	tok = token.ILLEGAL
+	builtNumber := []rune{lex.ch} // TODO research where we can keep it as byte
+
+	if lex.ch != '.' {
+		tok = token.INTEGER
+		lex.digits(&builtNumber)
+	}
+
+	if lex.ch == '.' {
+		lex.next()
+		tok = token.FLOAT
+		lex.digits(&builtNumber)
+	}
+
+	return tok, string(builtNumber)
+}
+
+func (lex *Lexer) scanString() string {
 	// " should be consumed to start scanning string value
 	return ""
 }
 
-func (lex Lexer) scanIdentifier() string {
+func (lex *Lexer) scanIdentifier() string {
 	// add already nexted letter cause in order this process to start is should be a letter
 	builtWord := []rune{lex.ch}
 
@@ -139,7 +169,7 @@ func (lex Lexer) scanIdentifier() string {
 	return string(builtWord)
 }
 
-func (lex Lexer) skipWhitespace() {
+func (lex *Lexer) skipWhitespace() {
 	for lex.ch == ' ' || lex.ch == '\t' || lex.ch == '\n' {
 		lex.next()
 	}
@@ -147,7 +177,7 @@ func (lex Lexer) skipWhitespace() {
 
 // Print Mock function that let's us print some values
 // to show that the lexer is working normally
-func (lex Lexer) Print() {
+func (lex *Lexer) Print() {
 	for _, lt := range lex.tokens {
 		var typing string
 		switch {
@@ -155,6 +185,8 @@ func (lex Lexer) Print() {
 			fmt.Println(lt.lit, ": error, invalid lexem")
 		case lt.tok.IsNumber():
 			typing = "number"
+		case lt.tok == token.STRING:
+			typing = "string"
 		case lt.tok.IsKeyword() || lt.tok.IsOperator():
 			typing = "lexem"
 		default:

@@ -52,6 +52,7 @@ var tokens = [...]string{
 
 	IDENT:   "IDENT",
 	INTEGER: "INTEGER",
+	FLOAT:   "FLOAT",
 	STRING:  "STRING",
 
 	VAR:   "var",
@@ -73,6 +74,7 @@ var keywords map[string]Token
 
 var predeclaredTypes = map[string]bool{
 	"integer": true,
+	"float":   true,
 }
 
 func init() {
