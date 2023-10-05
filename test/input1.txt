@@ -1,1 +1,1 @@
-23 var a:=begin  b: integer := 42;"
+23 var a:=begin  b: integer := 42;

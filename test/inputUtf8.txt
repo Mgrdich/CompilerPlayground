@@ -1,0 +1,6 @@
+var
+  բ, մկօVarTest: integer;
+begin
+  a:=23;b:=42;
+	a := b + 5;
+end.
