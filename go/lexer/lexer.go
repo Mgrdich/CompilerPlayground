@@ -42,7 +42,7 @@ func GetLexer(directory string) Lexer {
 		panic("directory is not defined")
 	}
 
-	return Lexer{directory: directory}
+	return Lexer{directory: directory, ch: ' '}
 }
 
 // Tokenize will tokenize the whole file , you can actually call lex.Scan() independently as well
@@ -89,9 +89,7 @@ func (lex *Lexer) Scan() (t token.Token, l string) {
 		return token.EOF, ""
 	}
 
-	lex.next()
-
-	//lex.skipWhitespace()
+	lex.skipWhitespace()
 
 	// no error
 	var tok token.Token
@@ -111,9 +109,43 @@ func (lex *Lexer) Scan() (t token.Token, l string) {
 	case isDecimal(ch):
 		tok, lit = lex.scanNumber()
 	default:
-		// TODO string and other tokens should be added here
-		tok = token.ADD
-		lit = "testing"
+		lex.next()
+		switch {
+		case ch == ',':
+			tok = token.COMMA
+			lit = ","
+		case ch == '+':
+			tok = token.ADD
+			lit = "+"
+		case ch == '-':
+			tok = token.SUB
+			lit = "-"
+		case ch == '*':
+			tok = token.MUL
+			lit = "*"
+		case ch == '/':
+			tok = token.QUO
+			lit = "/"
+		case ch == '%':
+			tok = token.REM
+			lit = "%"
+		case ch == ':':
+			tok = lex.switch2(token.COLON, token.DEFINE)
+			if tok == token.DEFINE {
+				lit = ":="
+			} else {
+				lit = ":"
+			}
+		case ch == ';':
+			tok = token.SEMICOLON
+			lit = ";"
+		case ch == '.':
+			tok = token.DOT
+			lit = "."
+		default:
+			tok = token.ILLEGAL
+			lit = string(ch)
+		}
 	}
 
 	return tok, lit
@@ -135,6 +167,8 @@ func (lex *Lexer) digits(builtNumber *[]rune) {
 func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
 	tok = token.ILLEGAL
 	builtNumber := []rune{lex.ch} // TODO research where we can keep it as byte
+
+	lex.next()
 
 	if lex.ch != '.' {
 		tok = token.INTEGER
@@ -175,6 +209,20 @@ func (lex *Lexer) skipWhitespace() {
 	}
 }
 
+// Helper functions for scanning multi-byte tokens such as >> += >>= .
+// Different routines recognize different length tok_i based on matches
+// of ch_i. If a token ends in '=', the result is tok1 or tok3
+// respectively. Otherwise, the result is tok0 if there was no other
+// matching character, or tok2 if the matching character was ch2.
+
+func (lex *Lexer) switch2(tok0, tok1 token.Token) token.Token {
+	if lex.ch == '=' {
+		lex.next()
+		return tok1
+	}
+	return tok0
+}
+
 // Print Mock function that let's us print some values
 // to show that the lexer is working normally
 func (lex *Lexer) Print() {
@@ -187,6 +235,8 @@ func (lex *Lexer) Print() {
 			typing = "number"
 		case lt.tok == token.STRING:
 			typing = "string"
+		case lt.tok == token.IDENT:
+			typing = "ident"
 		case lt.tok.IsKeyword() || lt.tok.IsOperator():
 			typing = "lexem"
 		default:

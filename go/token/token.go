@@ -38,6 +38,7 @@ const (
 	QUO
 	REM
 	DEFINE
+	COLON
 	DOT
 	SEMICOLON
 	COMMA
@@ -67,6 +68,7 @@ var tokens = [...]string{
 	DEFINE:    ":=",
 	DOT:       ".",
 	SEMICOLON: ";",
+	COLON:     ":",
 	COMMA:     ",",
 }
 
