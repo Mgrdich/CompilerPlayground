@@ -210,7 +210,7 @@ func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
 }
 
 func (lex *Lexer) scanString() (tok token.Token, lit string) {
-	builtWord := []rune{'"'} // because this is consumed and nexted already
+	var builtWord []rune // because this is consumed and nexted already
 
 	for {
 		ch := lex.ch
@@ -218,10 +218,11 @@ func (lex *Lexer) scanString() (tok token.Token, lit string) {
 			return token.ILLEGAL, string(builtWord)
 		}
 
-		builtWord = append(builtWord, ch)
 		lex.next()
 		if ch == '"' {
 			break
+		} else {
+			builtWord = append(builtWord, ch)
 		}
 	}
 
@@ -269,7 +270,7 @@ func (lex *Lexer) Print() {
 		var typing string
 		switch {
 		case lt.tok == token.ILLEGAL:
-			fmt.Println(lt.lit, ": error, invalid lexem")
+			fmt.Println(lt.lit + ": error, invalid lexem")
 		case lt.tok.IsNumber():
 			typing = "number"
 		case lt.tok == token.STRING:
@@ -283,7 +284,7 @@ func (lex *Lexer) Print() {
 		}
 
 		if lt.tok != token.ILLEGAL {
-			fmt.Println(typing, ":", lt.lit)
+			fmt.Println(typing + ":\"" + lt.lit + "\"")
 		}
 	}
 }
