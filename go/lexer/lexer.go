@@ -111,6 +111,9 @@ func (lex *Lexer) Scan() (t token.Token, l string) {
 	default:
 		lex.next()
 		switch {
+		case ch == '"':
+			// cause this might return invalid string
+			tok, lit = lex.scanString()
 		case ch == ',':
 			tok = token.COMMA
 			lit = ","
@@ -184,9 +187,23 @@ func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
 	return tok, string(builtNumber)
 }
 
-func (lex *Lexer) scanString() string {
-	// " should be consumed to start scanning string value
-	return ""
+func (lex *Lexer) scanString() (tok token.Token, lit string) {
+	builtWord := []rune{'"'} // because this is consumed and nexted already
+
+	for {
+		ch := lex.ch
+		if ch == '\n' || ch < 0 {
+			return token.ILLEGAL, string(builtWord)
+		}
+
+		builtWord = append(builtWord, ch)
+		lex.next()
+		if ch == '"' {
+			break
+		}
+	}
+
+	return token.STRING, string(builtWord)
 }
 
 func (lex *Lexer) scanIdentifier() string {
@@ -243,6 +260,8 @@ func (lex *Lexer) Print() {
 			typing = "unknown" // TODO something might have gone wrong here
 		}
 
-		fmt.Println(typing, ":", lt.lit)
+		if lt.tok != token.ILLEGAL {
+			fmt.Println(typing, ":", lt.lit)
+		}
 	}
 }
