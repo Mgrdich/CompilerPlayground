@@ -73,6 +73,25 @@ func (lex *Lexer) next() (r rune, size int) {
 	return r, size
 }
 
+func (lex *Lexer) peekRune() rune {
+	for peekBytes := 4; peekBytes > 0; peekBytes-- { // unicode rune can be up to 4 bytes
+		b, err := lex.reader.Peek(peekBytes)
+		if err == nil {
+			decodeRune, _ := utf8.DecodeRune(b)
+			if decodeRune == utf8.RuneError {
+				return utf8.RuneError
+			}
+
+			// success
+			return decodeRune
+		}
+		// Otherwise, we ignore Peek errors and try the next smallest number of bytes
+	}
+
+	// Pretty sure we can assume EOF if we get this far
+	return 0
+}
+
 func (lex *Lexer) StartScan() {
 	for {
 		tok, lit := lex.Scan()
@@ -106,7 +125,7 @@ func (lex *Lexer) Scan() (t token.Token, l string) {
 		} else {
 			tok = token.IDENT
 		}
-	case isDecimal(ch):
+	case isDecimal(ch) || ch == '.' && isDecimal(lex.peekRune()):
 		tok, lit = lex.scanNumber()
 	default:
 		lex.next()
@@ -156,15 +175,17 @@ func (lex *Lexer) Scan() (t token.Token, l string) {
 
 // digits can only read base 10 for now
 // even though the go source code implements it as an arbitrary base
-func (lex *Lexer) digits(builtNumber *[]rune) {
+func (lex *Lexer) digits(builtNumber *[]rune, state token.Token) token.Token {
+	tokenState := state
 	m := rune('0' + 10)
 	for isDecimal(lex.ch) {
 		if lex.ch >= m {
-			// TODO something must be done here understand the intricate case
+			tokenState = token.ILLEGAL
 		}
 		*builtNumber = append(*builtNumber, lex.ch)
 		lex.next()
 	}
+	return tokenState
 }
 
 func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
@@ -175,13 +196,14 @@ func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
 
 	if lex.ch != '.' {
 		tok = token.INTEGER
-		lex.digits(&builtNumber)
+		tok = lex.digits(&builtNumber, tok)
 	}
 
 	if lex.ch == '.' {
+		builtNumber = append(builtNumber, lex.ch) // add the dot notation
 		lex.next()
 		tok = token.FLOAT
-		lex.digits(&builtNumber)
+		lex.digits(&builtNumber, tok)
 	}
 
 	return tok, string(builtNumber)
@@ -221,7 +243,7 @@ func (lex *Lexer) scanIdentifier() string {
 }
 
 func (lex *Lexer) skipWhitespace() {
-	for lex.ch == ' ' || lex.ch == '\t' || lex.ch == '\n' {
+	for lex.ch == ' ' || lex.ch == '\t' || lex.ch == '\n' || lex.ch == '\r' {
 		lex.next()
 	}
 }

@@ -1,0 +1,6 @@
+var
+  բ, մկօVarTest: integer;
+begin
+  բ:=23;մկօVarTest:="testing";
+	բ := մկօVarTest + 5;
+end.
