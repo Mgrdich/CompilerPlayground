@@ -1,6 +1,4 @@
 goLexerExecFileName:=exec-lexer-go
-javaLexerExecFileName:=exec-lexer-java
-
 
 build-go-lexer:
 	go build ./go/$(goLexerExecFileName) ./go/main.go
