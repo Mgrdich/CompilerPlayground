@@ -1,5 +1,6 @@
 var
-  բ, մկօVarTest: integer;
+  բ : integer;
+  մկօVarTest : string
 begin
   բ:=23;մկօVarTest:="testing";
 	բ := մկօVarTest + 5;

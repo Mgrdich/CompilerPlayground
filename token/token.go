@@ -28,6 +28,9 @@ const (
 	VAR // var
 	BEGIN
 	END
+	IntKeyword
+	FloatKeyword
+	StringKeyword
 	keywordEnd
 
 	// Operators and delimiters
@@ -56,9 +59,12 @@ var tokens = [...]string{
 	FLOAT:   "FLOAT",
 	STRING:  "STRING",
 
-	VAR:   "var",
-	BEGIN: "begin",
-	END:   "end",
+	VAR:           "var",
+	BEGIN:         "begin",
+	END:           "end",
+	IntKeyword:    "integer",
+	FloatKeyword:  "float",
+	StringKeyword: "string",
 
 	ADD:       "+",
 	SUB:       "-",
@@ -73,11 +79,6 @@ var tokens = [...]string{
 }
 
 var keywords map[string]Token
-
-var predeclaredTypes = map[string]bool{
-	"integer": true,
-	"float":   true,
-}
 
 func init() {
 	keywords = make(map[string]Token, keywordEnd-(keywordBeg+1))
@@ -132,10 +133,4 @@ func IsIdentifier(name string) bool {
 		}
 	}
 	return true
-}
-
-// IsPredeclared returns if is predeclared
-// lower one work since the map is set , so we don't have to differentiate between
-func IsPredeclared(s string) bool {
-	return predeclaredTypes[s]
 }

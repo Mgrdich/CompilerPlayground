@@ -1,6 +1,6 @@
 var
   b: integer;
-  c : float
+  c : float;
 begin
   b:=42; c:=3.14;
 	c := c + b + 5;
