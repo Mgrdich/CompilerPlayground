@@ -1,7 +1,7 @@
 goLexerExecFileName:=exec-lexer-go
 
 build-go-lexer:
-	go build ./$(goLexerExecFileName) ./main.go
+	go build -o ./$(goLexerExecFileName) ./main.go
 
 run-go-lexer:
 	./$(goLexerExecFileName)
