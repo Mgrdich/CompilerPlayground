@@ -120,7 +120,7 @@ func IsKeyword(name string) bool {
 	return ok
 }
 
-// IsIdentifier reports whether name is a Go identifier, that is, a non-empty
+// IsIdentifier reports whether name is a our language identifier, that is, a non-empty
 // string made up of letters, digits, and underscores, where the first character
 // is not a digit. Keywords are not identifiers.
 func IsIdentifier(name string) bool {
