@@ -37,12 +37,12 @@ func isDigit(ch rune) bool {
 	return isDecimal(ch) || ch >= utf8.RuneSelf && unicode.IsDigit(ch)
 }
 
-func GetLexer(directory string) Lexer {
+func GetLexer(directory string) *Lexer {
 	if len(directory) == 0 {
 		panic("directory is not defined")
 	}
 
-	return Lexer{directory: directory, ch: ' '}
+	return &Lexer{directory: directory, ch: ' '}
 }
 
 // Tokenize will tokenize the whole file , you can actually call lex.Scan() independently as well
