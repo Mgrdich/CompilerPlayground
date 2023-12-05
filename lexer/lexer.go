@@ -196,15 +196,15 @@ func (lex *Lexer) scanNumber() (tok token.Token, lit string) {
 
 	if lex.ch != '.' {
 		tok = token.INTEGER
-		tok = lex.digits(&builtNumber, tok)
 	}
 
 	if lex.ch == '.' {
 		builtNumber = append(builtNumber, lex.ch) // add the dot notation
 		lex.next()
 		tok = token.FLOAT
-		lex.digits(&builtNumber, tok)
 	}
+
+	tok = lex.digits(&builtNumber, tok)
 
 	return tok, string(builtNumber)
 }
