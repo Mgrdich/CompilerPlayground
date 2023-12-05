@@ -114,7 +114,7 @@ func (tok Token) IsNumber() bool {
 // it returns false otherwise.
 func (tok Token) IsKeyword() bool { return keywordBeg < tok && tok < keywordEnd }
 
-// IsKeyword reports whether name is a Go keyword, such as "func" or "return".
+// IsKeyword reports whether name is a our language keyword, such as "func" or "return".
 func IsKeyword(name string) bool {
 	_, ok := keywords[name]
 	return ok
